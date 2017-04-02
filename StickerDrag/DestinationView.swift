@@ -41,15 +41,89 @@ class DestinationView: NSView {
     setup()
   }
   
+  
+  // MARK: - defines a set with the supported types
+  var acceptableTypes : Set<String> {return [NSURLPboardType]}
+  
   func setup() {
+    register(forDraggedTypes: Array(acceptableTypes))
   }
   
-  override func draw(_ dirtyRect: NSRect) {
-  }
-  
+  //MARK: -
   //we override hitTest so that this view which sits at the top of the view hierachy
   //appears transparent to mouse clicks
   override func hitTest(_ aPoint: NSPoint) -> NSView? {
     return nil
   }
+  
+  // MARK: - analyze the dragging session data
+  //1.
+  let filteringOptions = [NSPasteboardURLReadingContentsConformToTypesKey:NSImage.imageTypes()]
+  
+  func shouldAllowDrag(_ draggingInfo: NSDraggingInfo) -> Bool {
+    var canAccept = false
+    
+    //2.
+    let pasteBoard = draggingInfo.draggingPasteboard()
+    
+    //3.
+    if pasteBoard.canReadObject(forClasses: [NSURL.self], options: filteringOptions) {
+      canAccept = true
+    }
+    return canAccept
+  }
+  
+  //MARK: -
+  override func draw(_ dirtyRect: NSRect) {
+    if isReceivingDrag {
+      NSColor.selectedControlColor.set()
+      
+      let path = NSBezierPath(rect: bounds)
+      path.lineWidth = Appearance.lineWidth
+      path.stroke()
+    }
+  }
+  
+  // MARK: - use NSDraggingInfo  by override draggingEntered(_:)
+  //1.
+  var isReceivingDrag = false {
+    didSet {
+      needsDisplay = true
+    }
+  }
+  
+  //2.
+  override func draggingEntered(_ sender: NSDraggingInfo) -> NSDragOperation {
+    let allow = shouldAllowDrag(sender)
+    isReceivingDrag = allow
+    return allow ? .copy : NSDragOperation()
+  }
+  
+  // Handling an Exit
+  override func draggingExited(_ sender: NSDraggingInfo?) {
+    isReceivingDrag = false
+  }
+  
+  //MARK: - Wrap up the Drag
+  override func prepareForDragOperation(_ sender: NSDraggingInfo) -> Bool {
+    let allow = shouldAllowDrag(sender)
+    return allow
+  }
+  
+  override func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
+    //1.
+    isReceivingDrag = false
+    let pasteBoard = sender.draggingPasteboard()
+    
+    //2.
+    let point = convert(sender.draggingLocation(), from: nil)
+    
+    //3.
+    if let urls = pasteBoard.readObjects(forClasses: [NSURL.self], options: filteringOptions) as? [URL],urls.count > 0 {
+      delegate?.processImageURLs(urls, center: point)
+      return true
+    }
+    return false
+  }
+  
 }
