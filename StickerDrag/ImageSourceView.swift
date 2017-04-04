@@ -24,4 +24,31 @@
 import Cocoa
 
 class ImageSourceView: RoundedRectView {
+  override func mouseDown(with event: NSEvent) {
+    //1.
+    let pasteboardItem = NSPasteboardItem()
+    pasteboardItem.setDataProvider(self, forTypes: [kUTTypeTIFF])
+    
+    //2.
+    let draggingItem = NSDraggingItem(pasteboardWriter: pasteboardItem)
+    draggingItem.setDraggingFrame(self.bounds, contents: snapshot())
+    
+    //3.
+    beginDraggingSession(with: [draggingItem], event: event, source: self)
+  }
+}
+
+//MARK: - NSDraggingSrouce
+extension ImageSourceView : NSDraggingSource {
+  //1.
+  func draggingSession(_ session: NSDraggingSession, sourceOperationMaskFor context: NSDraggingContext) -> NSDragOperation {
+    return .generic
+  }
+}
+
+extension ImageSourceView : NSPasteboardItemDataProvider {
+  //2.
+  func pasteboard(_ pasteboard: NSPasteboard?, item: NSPasteboardItem, provideDataForType type: String) {
+    //TODO: Return image data
+  }
 }
