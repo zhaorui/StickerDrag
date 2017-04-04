@@ -43,7 +43,8 @@ class DestinationView: NSView {
   
   
   // MARK: - defines a set with the supported types
-  var acceptableTypes : Set<String> {return [NSURLPboardType]}
+  var nonURLTypes : Set<String> {return [String(kUTTypeTIFF)]}
+  var acceptableTypes : Set<String> {return nonURLTypes.union([NSURLPboardType])}
   
   func setup() {
     register(forDraggedTypes: Array(acceptableTypes))
@@ -68,6 +69,8 @@ class DestinationView: NSView {
     
     //3.
     if pasteBoard.canReadObject(forClasses: [NSURL.self], options: filteringOptions) {
+      canAccept = true
+    } else if let types = pasteBoard.types, nonURLTypes.intersection(types).count > 0 {
       canAccept = true
     }
     return canAccept
@@ -121,6 +124,9 @@ class DestinationView: NSView {
     //3.
     if let urls = pasteBoard.readObjects(forClasses: [NSURL.self], options: filteringOptions) as? [URL],urls.count > 0 {
       delegate?.processImageURLs(urls, center: point)
+      return true
+    } else if let image = NSImage(pasteboard: pasteBoard) {
+      delegate?.processImage(image, center: point)
       return true
     }
     return false

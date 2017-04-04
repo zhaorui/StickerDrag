@@ -40,15 +40,17 @@ class ImageSourceView: RoundedRectView {
 
 //MARK: - NSDraggingSrouce
 extension ImageSourceView : NSDraggingSource {
-  //1.
   func draggingSession(_ session: NSDraggingSession, sourceOperationMaskFor context: NSDraggingContext) -> NSDragOperation {
     return .generic
   }
 }
 
 extension ImageSourceView : NSPasteboardItemDataProvider {
-  //2.
   func pasteboard(_ pasteboard: NSPasteboard?, item: NSPasteboardItem, provideDataForType type: String) {
-    //TODO: Return image data
-  }
+    if let pasteboard = pasteboard, type == String(kUTTypeTIFF), let image = NSImage(named: "unicorn") {
+      let finalImage = image.tintedImageWithColor(NSColor.randomColor())
+      let tiffdata = finalImage.tiffRepresentation
+      pasteboard.setData(tiffdata, forType: type)
+    }
+    }
 }
