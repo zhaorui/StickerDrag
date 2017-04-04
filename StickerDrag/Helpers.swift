@@ -87,8 +87,8 @@ extension NSImage {
     var height = size.height
     if size.width > maxDimension || size.height > maxDimension {
       let aspectRatio = size.width/size.height
-      width = aspectRatio > 0 ? maxDimension : maxDimension*aspectRatio
-      height = aspectRatio < 0 ? maxDimension : maxDimension/aspectRatio
+      width = aspectRatio > 1 ? maxDimension : maxDimension*aspectRatio
+      height = aspectRatio < 1 ? maxDimension : maxDimension/aspectRatio
     }
     return NSSize(width: width, height: height)
   }

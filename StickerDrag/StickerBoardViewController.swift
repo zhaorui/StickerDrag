@@ -86,9 +86,40 @@ class StickerBoardViewController: NSViewController {
 extension StickerBoardViewController: DestinationViewDelegate {
   
   func processImageURLs(_ urls: [URL], center: NSPoint) {
+    for (index,url) in urls.enumerated() {
+      //1.
+      if let image = NSImage(contentsOf: url) {
+        
+        var newCenter = center
+        //2.
+        if index > 0 {
+          newCenter = center.addRandomNoise(Appearance.randomNoise)
+        }
+        
+        //3.
+        processImage(image, center: newCenter)
+      }
+    }
   }
   
   func processImage(_ image: NSImage, center: NSPoint) {
+    //1.
+    invitationLabel.isHidden = true
+    
+    //2.
+    let constrainedSize = image.aspectFitSizeForMaxDimension(Appearance.maxStickerDimension)
+    
+    //3.
+    let subview = NSImageView(frame: NSRect(x: center.x - constrainedSize.width/2,
+                                            y: center.y - constrainedSize.height/2,
+                                            width: constrainedSize.width,
+                                            height: constrainedSize.height))
+    subview.image = image
+    targetLayer.addSubview(subview)
+    
+    //4.
+    let maxrotation = CGFloat(arc4random_uniform(Appearance.maxRotation)) - Appearance.rotationOffset
+    subview.frameCenterRotation = maxrotation
   }
   
   func processAction(_ action: String, center: NSPoint) {
