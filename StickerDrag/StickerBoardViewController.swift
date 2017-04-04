@@ -123,6 +123,31 @@ extension StickerBoardViewController: DestinationViewDelegate {
   }
   
   func processAction(_ action: String, center: NSPoint) {
+    if action == SparkleDrag.action {
+      invitationLabel.isBezeled = true
+      
+      if let image = NSImage(named: "star") {
+        for _ in 1..<Appearance.numStars {
+          
+          //A.
+          let maxSize : CGFloat = Appearance.maxStarSize
+          let sizeChange = CGFloat(arc4random_uniform(Appearance.randonStarSizeChange))
+          let finalSize = maxSize - sizeChange
+          let newCenter = center.addRandomNoise(Appearance.randomNoiseStar)
+          
+          //B.
+          let imageFrame = NSRect(x: newCenter.x, y: newCenter.y, width: finalSize, height: finalSize)
+          let imageView = NSImageView(frame: imageFrame)
+          
+          //C.
+          let newImage = image.tintedImageWithColor(NSColor.randomColor())
+          
+          //D.
+          imageView.image = newImage
+          targetLayer.addSubview(imageView)
+        }
+      }
+    }
   }
 }
 

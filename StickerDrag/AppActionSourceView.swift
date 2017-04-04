@@ -28,4 +28,24 @@ enum SparkleDrag {
 }
 
 class AppActionSourceView: RoundedRectView {
+  override func mouseDown(with event: NSEvent) {
+    let pasteboardItem = NSPasteboardItem()
+    pasteboardItem.setString(SparkleDrag.action, forType: SparkleDrag.type)
+    let draggingItem = NSDraggingItem(pasteboardWriter: pasteboardItem)
+    draggingItem.setDraggingFrame(self.bounds, contents: snapshot())
+    
+    beginDraggingSession(with: [draggingItem], event: event, source: self)
+  }
+}
+
+//MARK: - NSDraggingSource
+extension AppActionSourceView: NSDraggingSource {
+  func draggingSession(_ session: NSDraggingSession, sourceOperationMaskFor context: NSDraggingContext) -> NSDragOperation {
+    switch context {
+    case .outsideApplication:
+      return NSDragOperation()
+    case .withinApplication:
+      return .generic
+    }
+  }
 }

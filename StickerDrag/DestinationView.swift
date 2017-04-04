@@ -43,7 +43,7 @@ class DestinationView: NSView {
   
   
   // MARK: - defines a set with the supported types
-  var nonURLTypes : Set<String> {return [String(kUTTypeTIFF)]}
+  var nonURLTypes : Set<String> {return [String(kUTTypeTIFF), SparkleDrag.type]}
   var acceptableTypes : Set<String> {return nonURLTypes.union([NSURLPboardType])}
   
   func setup() {
@@ -127,6 +127,10 @@ class DestinationView: NSView {
       return true
     } else if let image = NSImage(pasteboard: pasteBoard) {
       delegate?.processImage(image, center: point)
+      return true
+    } else if let types = pasteBoard.types, types.contains(SparkleDrag.type),
+      let action = pasteBoard.string(forType: SparkleDrag.type) {
+      delegate?.processAction(action, center: point)
       return true
     }
     return false
